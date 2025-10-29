@@ -1,0 +1,190 @@
+%% --- FMCW Radar Simulation: Multiple Targets + 3D Point Cloud ---
+
+clear; clc; close all;
+
+%% --- Parameters ---
+c = 3e8;                % Speed of light (m/s)
+fc = 77e9;              % Carrier frequency (Hz)
+lambda = c/fc;          % Wavelength
+
+% Chirp parameters
+bw = 150e6;             % Bandwidth
+T_chirp = 10e-6;        % Chirp duration
+k = bw/T_chirp;         % Chirp slope
+fs = 2*bw;              % Sampling rate
+
+% Frame parameters
+n_chirps = 64;          
+T_frame = T_chirp*n_chirps;
+
+% Antenna array
+N_rx = 16;              % Number of receive antennas
+d = lambda/2;           % Antenna spacing
+
+% Targets
+target_range = [200, 75, 50];        % meters
+target_vel   = [20, -15, 10];        % m/s
+target_rcs   = [10, 0.8, 0.5];       % radar cross-section
+target_angle = [30, -20, 10]*pi/180; % radians
+n_targets = length(target_range);
+
+%% --- Generate Tx waveform ---
+t = 0:1/fs:T_chirp-1/fs; 
+n_samples = length(t);
+tx_phase = 2*pi*(fc*t + (k/2)*t.^2);
+Tx = exp(1j*tx_phase);
+
+%% --- Simulate received signals (all antennas, all chirps) ---
+Mix_matrix = zeros(n_chirps, n_samples, N_rx);
+
+for i = 1:n_chirps
+    Rx_total = zeros(N_rx, n_samples); 
+    time_at_chirp_start = (i-1)*T_chirp;
+
+    for j = 1:n_targets
+        r0 = target_range(j);
+        v0 = target_vel(j);
+        theta = target_angle(j);
+
+        current_range = r0 + v0*time_at_chirp_start;
+        tau = 2*current_range/c;
+        t_rx = t - tau;
+
+        rx_phase = 2*pi*(fc*t_rx + (k/2)*t_rx.^2);
+        Rx_j = exp(1j*rx_phase);
+
+        for m = 1:N_rx
+            Rx_total(m,:) = Rx_total(m,:) + ...
+                (target_rcs(j)/(current_range^4)) * Rx_j .* ...
+                exp(-1j*2*pi*(m-1)*d*sin(theta)/lambda);
+        end
+    end
+    
+    % Add noise
+    Rx_noisy = awgn(Rx_total.', 10, 'measured'); % [n_samples x N_rx]
+    
+    % Mix with Tx
+    Mix_matrix(i,:,:) = reshape(Tx.' .* conj(Rx_noisy), [1, n_samples, N_rx]);
+end
+
+%% --- Plot 1: Raw ADC samples (first antenna) ---
+figure;
+imagesc(1:n_samples, 1:n_chirps, real(squeeze(Mix_matrix(:,:,1))));
+title('Raw ADC Samples (Antenna 1)');
+xlabel('ADC Sample Index (Fast Time)');
+ylabel('Chirp Index (Slow Time)');
+colorbar; axis xy;
+
+%% --- Range FFT ---
+n_fft_range = 2^nextpow2(n_samples);
+range_fft = fft(Mix_matrix, n_fft_range, 2);
+range_axis = (fs*(0:(n_fft_range-1))/n_fft_range)*c/(2*k); % include 0
+
+%% --- Plot 2: Range-only FFT (first antenna) ---
+figure;
+range_plot = abs(squeeze(range_fft(:,1:n_fft_range/2+1,1)));
+imagesc(range_axis(1:n_fft_range/2+1), 1:n_chirps, 20*log10(range_plot));
+title('Range FFT (Antenna 1)');
+xlabel('Range (m)');
+ylabel('Chirp Index');
+colorbar; axis xy; xlim([0 250]);
+
+%% --- Doppler FFT ---
+n_fft_vel = 2^nextpow2(n_chirps);
+rdm = fftshift(fft(range_fft, n_fft_vel, 1),1);
+fs_doppler = 1/T_chirp;
+doppler_freq_axis = linspace(-fs_doppler/2, fs_doppler/2, n_fft_vel);
+vel_axis = doppler_freq_axis*lambda/2;
+
+%% --- Plot 3: Range-Doppler Map (first antenna) ---
+figure;
+rdm_plot = abs(squeeze(rdm(:,1:n_fft_range/2+1,1)));
+imagesc(range_axis(1:n_fft_range/2+1), vel_axis, 10*log10(rdm_plot));
+title('Range-Doppler Map (Antenna 1)');
+xlabel('Range (m)');
+ylabel('Velocity (m/s)');
+colorbar; axis xy; xlim([0 250]);
+
+%% --- Angle FFT across antennas ---
+n_fft_angle = 128;
+RDA_fft = fftshift(fft(rdm, n_fft_angle, 3),3);
+angle_axis = asind(linspace(-1,1,n_fft_angle));
+
+%% --- Plot 4: Range-Angle Map (collapsed over Doppler) ---
+angle_map_all = squeeze(max(abs(RDA_fft(:,1:n_fft_range/2+1,:)), [], 1));
+angle_map_dB = 20*log10(angle_map_all / max(angle_map_all(:)));
+angle_map_dB(angle_map_dB < -40) = -40;
+
+figure;
+imagesc(range_axis(1:n_fft_range/2+1), angle_axis, angle_map_dB.');
+xlabel('Range (m)');
+ylabel('Angle (deg)');
+title('Range-Angle Map (collapsed over Doppler)');
+colorbar; axis xy; xlim([0 250]);
+
+%% --- Plot 5: 3D Radar Cube Point Cloud ---
+cube_data = abs(RDA_fft(:,1:n_fft_range/2+1,:));
+cube_data = cube_data / max(cube_data(:));
+min_thresh = 0.05;
+mask = cube_data > min_thresh;
+
+[n_vel_grid, n_range_grid, n_angle_grid] = ndgrid(vel_axis, range_axis(1:n_fft_range/2+1), angle_axis);
+
+x = n_range_grid(mask);
+y = n_vel_grid(mask);
+z = n_angle_grid(mask);
+v = cube_data(mask);
+
+figure;
+scatter3(x, y, z, 15, v, 'filled');
+xlabel('Range (m)');
+ylabel('Velocity (m/s)');
+zlabel('Angle (deg)');
+title('Radar Cube Point Cloud (Normalized Amplitude)');
+colorbar; colormap jet; grid on; view(45,30);
+xlim([0 300]); ylim([-50 50]); zlim([-45 45]);
+
+%% --- Detect Targets and Compare to Actual (Robust) ---
+cube_mag = abs(RDA_fft(:,1:n_fft_range/2+1,:));
+cube_mag = cube_mag / max(cube_mag(:));
+
+% Threshold to keep significant points
+detection_thresh = 0.1;  
+[vel_idx, range_idx, angle_idx] = ind2sub(size(cube_mag), find(cube_mag >= detection_thresh));
+det_amplitudes = cube_mag(cube_mag >= detection_thresh);
+
+% Keep top N peaks
+N_peaks = min(n_targets, length(det_amplitudes));  % cannot exceed detected points
+[~, sort_idx] = sort(det_amplitudes, 'descend');
+sort_idx = sort_idx(1:N_peaks);
+
+vel_idx = vel_idx(sort_idx);
+range_idx = range_idx(sort_idx);
+angle_idx = angle_idx(sort_idx);
+det_amplitudes = det_amplitudes(sort_idx);
+
+% Map indices to physical units
+det_ranges = range_axis(range_idx);
+det_velocities = vel_axis(vel_idx);
+det_angles = angle_axis(angle_idx);
+
+% Prepare comparison table
+n_compare = N_peaks;  % number of rows in table = number of detected peaks
+MeasuredRange = det_ranges(:);
+ActualRange   = target_range(1:n_compare).';   % match size
+MeasuredVelocity = det_velocities(:);
+ActualVelocity   = target_vel(1:n_compare).';
+MeasuredAngle    = det_angles(:);
+ActualAngle      = target_angle(1:n_compare).'*180/pi;  % convert rad → deg
+NormalizedAmplitude = det_amplitudes(:);
+
+DetectedTable = table(...
+    MeasuredRange, ActualRange, ...
+    MeasuredVelocity, ActualVelocity, ...
+    MeasuredAngle, ActualAngle, ...
+    NormalizedAmplitude);
+
+disp('Detected Targets vs Actual:');
+disp(DetectedTable);
+
+
