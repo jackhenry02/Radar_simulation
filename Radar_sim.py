@@ -36,6 +36,12 @@ n_samples = len(t)
 tx_phase = 2*np.pi*(fc*t + 0.5*k*t**2)
 Tx = np.exp(1j*tx_phase)
 
+# --- Windows & RNG seed (to match typical MATLAB processing) ---
+np.random.seed(0)
+range_win = windows.hann(n_samples, sym=False).astype(np.float64)
+doppler_win = windows.hann(n_chirps, sym=False).astype(np.float64)
+angle_win = windows.hann(N_rx, sym=False).astype(np.float64)
+
 # --- Simulate received signals ---
 Mix_matrix = np.zeros((n_chirps, n_samples, N_rx), dtype=complex)
 
@@ -75,7 +81,9 @@ plt.show()
 
 # --- Range FFT ---
 n_fft_range = 2**int(np.ceil(np.log2(n_samples)))
-range_fft = fft(Mix_matrix, n_fft_range, axis=1)
+# apply range window along fast-time
+range_windowed = Mix_matrix * range_win[None, :, None]
+range_fft = fft(range_windowed, n_fft_range, axis=1)
 range_axis = (fs*np.arange(n_fft_range)/n_fft_range)*c/(2*k)
 
 # --- Plot 2: Range FFT ---
@@ -90,6 +98,8 @@ plt.show()
 
 # --- Doppler FFT ---
 n_fft_vel = 2**int(np.ceil(np.log2(n_chirps)))
+# apply Doppler window along slow-time
+range_fft = range_fft * doppler_win[:, None, None]
 rdm = fftshift(fft(range_fft, n_fft_vel, axis=0), axes=0)
 fs_doppler = 1/T_chirp
 doppler_freq_axis = np.linspace(-fs_doppler/2, fs_doppler/2, n_fft_vel)
@@ -107,6 +117,8 @@ plt.show()
 
 # --- Angle FFT across antennas ---
 n_fft_angle = 128
+# apply angle window across antenna elements
+rdm = rdm * angle_win[None, None, :]
 RDA_fft = fftshift(fft(rdm, n_fft_angle, axis=2), axes=2)
 angle_axis = np.arcsin(np.linspace(-1,1,n_fft_angle))*180/np.pi
 
