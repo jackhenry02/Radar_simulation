@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNNs in Bat Echolocation: A Research Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        
+        :root {
+          --c-dark-blue: #004080;
+          --c-medium-blue: #0059B3;
+          --c-bright-blue: #0073E6;
+          --c-light-blue: #3399FF;
+          --c-pale-blue: #99CCFF;
+          --c-bg: #f8faff;
+          --c-text: #1a202c;
+          --c-text-light: #4a5568;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-text);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        .flow-step {
+            background-color: white;
+            border: 2px solid var(--c-medium-blue);
+            color: var(--c-dark-blue);
+        }
+        
+        .flow-step.processor {
+            border-color: var(--c-bright-blue);
+        }
+        
+        .flow-arrow {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: var(--c-light-blue);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <main class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-black mb-3" style="color: var(--c-dark-blue);">
+                Deconstructing the Bat
+            </h1>
+            <p class="text-xl md:text-2xl font-light" style="color: var(--c-medium-blue);">
+                An Analysis of Spiking Neural Networks in Bio-Inspired Echolocation
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+
+            <section class="md:col-span-2 bg-white rounded-lg shadow-xl p-6 md:p-8 border-t-4 border-blue-600" style="border-color: var(--c-bright-blue);">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--c-dark-blue);">The "Spike-FMCW" Pipeline: A Novel Proposal</h2>
+                <p class="mb-6" style="color: var(--c-text-light);">
+                    This infographic analyzes a proposed end-to-end spiking radar model ("Spike-FMCW") against the state-of-the-art in computational bat neurobiology. The proposed pipeline, visualized below, combines a spiking transmitter with a spiking processor, a unique architecture in this field.
+                </p>
+                
+                <div class="flex flex-col md:flex-row items-center justify-around space-y-4 md:space-y-0 p-4 rounded-lg" style="background-color: var(--c-bg);">
+                    
+                    <div class="flex flex-col items-center text-center">
+                        <div class="flow-step w-36 p-3 rounded-lg shadow text-sm font-semibold">
+                            SNN Transmitter (LIF Neuron)
+                        </div>
+                        <div class="flow-arrow block md:hidden">&darr;</div>
+                        <p class="text-xs mt-1" style="color: var(--c-text-light);">Stochastic PRI</p>
+                    </div>
+                    
+                    <div class="flow-arrow hidden md:block">&rarr;</div>
+
+                    <div class="flex flex-col items-center text-center">
+                        <div class="flow-step w-36 p-3 rounded-lg shadow text-sm font-semibold">
+                            Modulator (Convolution)
+                        </div>
+                        <div class="flow-arrow block md:hidden">&darr;</div>
+                        <p class="text-xs mt-1" style="color: var(--c-text-light);">Spike-Train + FMCW Chirp</p>
+                    </div>
+
+                    <div class="flow-arrow hidden md:block">&rarr;</div>
+                    
+                    <div class="flex flex-col items-center text-center">
+                        <div class="flow-step w-36 p-3 rounded-lg shadow text-sm font-semibold">
+                            Physics Channel & Receiver
+                        </div>
+                        <div class="flow-arrow block md:hidden">&darr;</div>
+                        <p class="text-xs mt-1" style="color: var(--c-text-light);">Matched Filter + SNN Encoder</p>
+                    </div>
+
+                    <div class="flow-arrow hidden md:block">&rarr;</div>
+
+                    <div class="flex flex-col items-center text-center">
+                        <div class="flow-step processor w-36 p-3 rounded-lg shadow text-sm font-semibold">
+                            SNN Processor ("Brain")
+                        </div>
+                        <div class="flow-arrow block md:hidden">&darr;</div>
+                        <p class="text-xs mt-1" style="color: var(--c-text-light);">Unsupervised Correlator OR<br>Supervised Classifier</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--c-dark-blue);">Core Task: Range Estimation</h2>
+                <p class="mb-6 text-sm" style="color: var(--c-text-light);">
+                    We compare the proposed model's range-finding mechanisms against established biologically-plausible models. State-of-the-art (SoA) models often replicate "Delay-Tuned Neurons" (DTNs) found in the bat's Inferior Colliculus (IC), which are highly plausible but can be complex to train. The proposed supervised SNN shows high performance, though with less direct biological mapping.
+                </p>
+                <div class="chart-container">
+                    <canvas id="rangeChart"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--c-dark-blue);">Capability Gaps: Velocity & Localization</h2>
+                <p class="mb-6 text-sm" style="color: var(--c-text-light);">
+                    While strong in range estimation, the current "Spike-FMCW" model lacks mechanisms for critical bat abilities. These include Doppler Shift Compensation (DSC) for velocity and processing binaural cues (ITD/ILD) for 3D localization. Existing SoA research provides clear neuro-inspired models for these tasks.
+                </p>
+                <div class="chart-container">
+                    <canvas id="gapsChart"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--c-dark-blue);">How Do Bat-Models Learn?</h2>
+                <p class="mb-6 text-sm" style="color: var(--c-text-light);">
+                    A survey of SNN echolocation models shows a clear trend. Spike-Timing-Dependent Plasticity (STDP) is a favored mechanism for its biological plausibility in learning echo delays. However, surrogate gradients (as used in the proposed model) are increasingly popular for their high performance in engineering applications.
+                </p>
+                <div class="chart-container">
+                    <canvas id="learningChart"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--c-dark-blue);">Originality & Future Work</h2>
+                <p class="mb-6 text-sm" style="color: var(--c-text-light);">
+                    The primary novelty of the "Spike-FMCW" model is its end-to-end spiking architecture. Most research assumes a classical signal and models only the processor. The SNN-based transmitter is a significant contribution.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="text-center p-4 rounded-lg" style="background-color: var(--c-bg);">
+                        <p class="text-7xl font-black" style="color: var(--c-dark-blue);">90%</p>
+                        <p class="text-lg font-bold" style="color: var(--c-medium-blue);">Novelty Score</p>
+                        <p class="text-xs" style="color: var(--c-text-light);">(Based on SNN-Transmitter + SNN-Processor combination)</p>
+                    </div>
+                    
+                    <div class_ ="p-4">
+                        <h4 class="text-lg font-bold mb-2" style="color: var(--c-dark-blue);">Key Next Steps:</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm" style="color: var(--c-text-light);">
+                            <li>Integrate SNN models for <strong>Doppler Shift Compensation</strong>.</li>
+                            <li>Model binaural cues (ITD/ILD) based on the <strong>Superior Olivary Complex</strong>.</li>
+                            <li>Explore <strong>STDP learning rules</strong> for delay-tuning.</li>
+                            <li>Test model on <strong>neuromorphic hardware</strong> (e.g., Loihi).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="md:col-span-2 text-center text-sm mt-8" style="color: var(--c-text-light);">
+                <p>Infographic created by Canvas Infographics. Data synthesized from research directive on computational bat neurobiology.</p>
+            </footer>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const chartColors = {
+                darkBlue: 'rgba(0, 64, 128, 1)',
+                mediumBlue: 'rgba(0, 89, 179, 1)',
+                brightBlue: 'rgba(0, 115, 230, 1)',
+                lightBlue: 'rgba(51, 153, 255, 1)',
+                paleBlue: 'rgba(153, 204, 255, 1)',
+                darkBlueA: 'rgba(0, 64, 128, 0.2)',
+                brightBlueA: 'rgba(0, 115, 230, 0.2)',
+                text: '#1a202c',
+                grid: '#e0e0e0'
+            };
+
+            function wrapLabel(label) {
+                const maxLen = 16;
+                if (label.length <= maxLen) return label;
+                const words = label.split(' ');
+                let lines = [];
+                let currentLine = '';
+                for (const word of words) {
+                    if ((currentLine + ' ' + word).trim().length > maxLen && currentLine.length > 0) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = (currentLine + ' ' + word).trim();
+                    }
+                }
+                if (currentLine.length > 0) lines.push(currentLine);
+                return lines;
+            }
+            
+            function tooltipTitleCallback(tooltipItems) {
+                const item = tooltipItems[0];
+                if (!item) return '';
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            }
+            
+            const commonTooltipOptions = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        },
+                        backgroundColor: '#000',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 4
+                    },
+                    legend: {
+                        labels: {
+                            color: chartColors.text,
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                maintainAspectRatio: false,
+                responsive: true
+            };
+
+            if (document.getElementById('rangeChart')) {
+                const ctx = document.getElementById('rangeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            "User's Coincidence Bank", 
+                            "User's Supervised SNN", 
+                            "SoA: Delay-Tuned Neurons", 
+                            "SoA: STDP-based Learning"
+                        ].map(wrapLabel),
+                        datasets: [{
+                            label: 'Biological Plausibility',
+                            data: [6, 4, 9, 8],
+                            backgroundColor: chartColors.mediumBlue,
+                            borderRadius: 4
+                        }, {
+                            label: 'Task Performance',
+                            data: [7, 9, 8, 7],
+                            backgroundColor: chartColors.lightBlue,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        ...commonTooltipOptions,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: { color: chartColors.text, font: { size: 10 } },
+                                grid: { color: chartColors.grid }
+                            },
+                            x: {
+                                ticks: { color: chartColors.text, font: { size: 11 } },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('gapsChart')) {
+                const ctx = document.getElementById('gapsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: [
+                            'Range Estimation', 
+                            'Velocity (DSC)', 
+                            'Azimuth (ITD)', 
+                            'Elevation (ILD)', 
+                            'Target Recognition'
+                        ].map(wrapLabel),
+                        datasets: [{
+                            label: "User's Spike-FMCW Model",
+                            data: [9, 2, 1, 1, 3],
+                            borderColor: chartColors.brightBlue,
+                            backgroundColor: chartColors.brightBlueA,
+                            pointBackgroundColor: chartColors.brightBlue,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: chartColors.brightBlue
+                        }, {
+                            label: 'Ideal Bat Model (SoA)',
+                            data: [9, 9, 8, 7, 7],
+                            borderColor: chartColors.darkBlue,
+                            backgroundColor: chartColors.darkBlueA,
+                            pointBackgroundColor: chartColors.darkBlue,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: chartColors.darkBlue
+                        }]
+                    },
+                    options: {
+                        ...commonTooltipOptions,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                pointLabels: {
+                                    font: { size: 11 },
+                                    color: chartColors.text
+                                },
+                                ticks: {
+                                    backdropColor: 'transparent',
+                                    color: chartColors.text,
+                                    font: { size: 10 },
+                                    stepSize: 2
+                                },
+                                grid: { color: chartColors.grid }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('learningChart')) {
+                const ctx = document.getElementById('learningChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'STDP (Plasticity)', 
+                            'Surrogate Gradients', 
+                            'Hard-Coded / Not Learned', 
+                            'Unsupervised Correlation'
+                        ].map(wrapLabel),
+                        datasets: [{
+                            label: 'Prevalence in SNN Bat Models',
+                            data: [40, 35, 15, 10],
+                            backgroundColor: [
+                                chartColors.mediumBlue,
+                                chartColors.lightBlue,
+                                chartColors.darkBlue,
+                                chartColors.paleBlue
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        ...commonTooltipOptions
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
