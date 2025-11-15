@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-M">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditory Localization: Bat vs. Human</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #E0F7FA;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .flow-arrow::after {
+            content: '▼';
+            font-size: 1.5rem;
+            color: #1E90FF;
+            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .flow-box {
+            background-color: #ffffff;
+            border: 2px solid #1E90FF;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #192A51;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#192A51] mb-4">Sound in Space</h1>
+            <p class="text-xl md:text-2xl text-[#1E90FF] font-semibold">A Neuro-Computational Comparison of Bat & Human Auditory Localization</p>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-[#192A51] mb-6 text-center">Two Strategies, One Goal: 'Seeing' with Sound</h2>
+            <p class="text-lg text-gray-700 max-w-4xl mx-auto mb-8 text-center">
+                Both bats and humans build a 3D map of their surroundings using sound. However, their fundamental strategies and neurobiology are dramatically different. Bats are active specialists, creating their own signals, while humans are passive generalists, interpreting existing sounds.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-xl p-6 border-l-4 border-[#1E90FF]">
+                    <h3 class="text-2xl font-bold text-[#192A51] mb-3">🦇 Active Echolocation (Bat)</h3>
+                    <p class="text-gray-700">Bats emit high-frequency ultrasonic pulses and then analyze the returning echoes. Their brains are highly specialized to extract precise details from these echoes, effectively 'seeing' their environment in complete darkness.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-xl p-6 border-l-4 border-[#00BFFF]">
+                    <h3 class="text-2xl font-bold text-[#192A51] mb-3">👤 Passive Localization (Human)</h3>
+                    <p class="text-gray-700">Humans listen to external sound sources—a voice, a car, a footstep. Our auditory system has evolved to compute a sound's location by cross-referencing subtle cues received by both ears, a process that works instantly and unconsciously.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-[#192A51] mb-6 text-center">The Human Toolkit: A Tale of Two Ears</h2>
+            <p class="text-lg text-gray-700 max-w-4xl mx-auto mb-8 text-center">
+                Human horizontal localization is governed by the "Duplex Theory." Our brain cleverly uses two different mechanisms based on the sound's frequency, as lower frequencies behave differently in space than higher ones.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-[#192A51] mb-4 text-center">The Duplex Theory: ITD vs. ILD</h3>
+                    <p class="text-gray-600 text-center mb-4">The brain prioritizes time differences for low frequencies and volume differences for high frequencies.</p>
+                    <div class="chart-container">
+                        <canvas id="duplexChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-[#192A51] mb-4 text-center">Vertical Cues: The Pinna's Role</h3>
+                    <p class="text-gray-600 text-center mb-4">To determine if a sound is above or below, the brain analyzes how the unique folds of our outer ear (pinna) filter the sound, creating a "spectral fingerprint" (HRTF).</p>
+                    <div class="chart-container">
+                        <canvas id="elevationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-[#192A51] mb-6 text-center">The Bat Toolkit: An Active Specialist</h2>
+            <p class="text-lg text-gray-700 max-w-4xl mx-auto mb-8 text-center">
+                The bat's active strategy requires highly specialized neural circuits for tasks humans simply don't perform, such as calculating range via echo delay and compensating for an object's speed using Doppler shifts.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-[#192A51] mb-4 text-center">Bat's Active Processing Pipeline</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="flow-box">1. Emit Ultrasonic Pulse</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box">2. Echo Returns from Target</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box">3. Process Pulse-Echo Delay (Range)</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box">4. Process Doppler Shift (Velocity)</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box">5. Process Binaural/Spectral Cues (Direction)</div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-[#192A51] mb-4 text-center">Core Task Mechanism Comparison</h3>
+                    <p class="text-gray-600 text-center mb-4">A comparison reveals the bat's specialization for active echo analysis versus the human's reliance on passive cues.</p>
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-[#192A51] mb-6 text-center">The Spiking Connection: SNNs in Auditory Modeling</h2>
+            <p class="text-lg text-gray-700 max-w-4xl mx-auto mb-8 text-center">
+                Auditory processing is all about timing, often down to the microsecond. Spiking Neural Networks (SNNs) are the ideal tool for modeling these processes, as their fundamental unit of computation is the spike train. SNN research focus reflects the key biological differences.
+            </p>
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-[#192A51] mb-4 text-center">SNN Research Focus: Bat vs. Human</h3>
+                <div class="chart-container" style="max-width: 600px;">
+                    <canvas id="snnRadarChart"></canvas>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-[#192A51] mb-6 text-center">Prominent SNN Model Applications</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h4 class="text-xl font-bold text-[#1E90FF] mb-2">The Jeffress Model SNN (Human ITD)</h4>
+                    <p class="text-gray-700">The 1948 Jeffress model is the quintessential auditory SNN. It uses spiking delay lines and coincidence detector neurons to convert microsecond time differences (ITDs) into a "place code" for sound location. This is a primary SNN application in human models.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h4 class="text-xl font-bold text-[#00BFFF] mb-2">STDP for HRTF Learning (Human Elevation)</h4>
+                    <p class="text-gray-700">SNNs using Spike-Timing-Dependent Plasticity (STDP) are used to model how the brain learns to recognize the complex spectral "fingerprints" (HRTFs) created by the pinna. The SNN learns to associate specific spectral patterns with vertical locations.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h4 class="text-xl font-bold text-[#192A51] mb-2">Delay-Tuned SNNs (Bat Range)</h4>
+                    <p class="text-gray-700">A major focus in bat models. SNNs are built to replicate neurons in the bat's auditory cortex that fire *only* for a specific, learned time delay between the outgoing pulse and the incoming echo. This directly computes the target's range, a function absent in human models.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-12 pt-8 border-t border-gray-300">
+            <p class="text-lg font-bold text-[#192A51] mb-2">Conclusion: Generalists vs. Specialists</p>
+            <p class="text-gray-700 max-w-4xl mx-auto">
+                Human auditory models excel at passive localization using binaural cues, making SNNs of the Jeffress model highly relevant. Bat models, in contrast, leverage SNNs to solve specialized active-sensing problems like echo-delay tuning (range) and Doppler-shift compensation (velocity). Both demonstrate the power of SNNs in capturing the critical temporal dynamics of audition.
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+
+            const commonTooltipConfig = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        },
+                        backgroundColor: '#192A51',
+                        titleFont: { weight: 'bold' },
+                        bodyFont: { size: 14 },
+                        padding: 12,
+                        cornerRadius: 6
+                    },
+                    legend: {
+                        labels: {
+                            color: '#192A51',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const duplexChartCtx = document.getElementById('duplexChart').getContext('2d');
+            new Chart(duplexChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['< 1.5 kHz (Low Freq)', '> 1.5 kHz (High Freq)'],
+                    datasets: [
+                        {
+                            label: 'ITD Usefulness (Time)',
+                            data: [90, 10],
+                            backgroundColor: '#1E90FF',
+                            borderColor: '#192A51',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'ILD Usefulness (Volume)',
+                            data: [10, 90],
+                            backgroundColor: '#00BFFF',
+                            borderColor: '#192A51',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    ...commonTooltipConfig,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Cue Dominance (%)', color: '#192A51' },
+                            ticks: { color: '#192A51' }
+                        },
+                        x: {
+                            ticks: { color: '#192A51', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+
+            const elevationChartCtx = document.getElementById('elevationChart').getContext('2d');
+            new Chart(elevationChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [['Pinna Spectral', 'Cues (HRTF)'], 'Head Shadow', 'Reflections & Other'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: ['#1E90FF', '#00BFFF', '#87CEFA'],
+                        borderColor: '#ffffff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    ...commonTooltipConfig,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        ...commonTooltipConfig.plugins,
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#192A51',
+                                font: {
+                                    size: 14
+                                },
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+
+            const comparisonChartCtx = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(comparisonChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: [['Range', 'Estimation'], ['Velocity', 'Estimation'], ['Azimuth', 'Precision']],
+                    datasets: [
+                        {
+                            label: 'Bat (Active)',
+                            data: [95, 90, 85],
+                            backgroundColor: '#192A51',
+                            borderColor: '#192A51',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Human (Passive)',
+                            data: [20, 30, 65],
+                            backgroundColor: '#1E90FF',
+                            borderColor: '#1E90FF',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    ...commonTooltipConfig,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Relative Capability (0-100)', color: '#192A51' },
+                            ticks: { color: '#192A51' }
+                        },
+                        x: {
+                            ticks: { color: '#192A51', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+
+            const snnRadarChartCtx = document.getElementById('snnRadarChart').getContext('2d');
+            new Chart(snnRadarChartCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['ITD/Binaural', ['Delay-Tuning', '(Range)'], 'Doppler (DSC)', 'HRTF/Spectral', ['Target', 'Classification']],
+                    datasets: [
+                        {
+                            label: 'Bat SNN Models',
+                            data: [60, 95, 90, 50, 80],
+                            backgroundColor: 'rgba(25, 42, 81, 0.4)',
+                            borderColor: '#192A51',
+                            pointBackgroundColor: '#192A51',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#192A51',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Human SNN Models',
+                            data: [95, 10, 5, 85, 40],
+                            backgroundColor: 'rgba(30, 144, 255, 0.4)',
+                            borderColor: '#1E90FF',
+                            pointBackgroundColor: '#1E90FF',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#1E90FF',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    ...commonTooltipConfig,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            angleLines: { color: '#B0BEC5' },
+                            grid: { color: '#CFD8DC' },
+                            pointLabels: {
+                                color: '#192A51',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            },
+                            ticks: {
+                                backdropColor: '#E0F7FA',
+                                color: '#1E90FF'
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
